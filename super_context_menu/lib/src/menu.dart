@@ -49,6 +49,8 @@ class DeferredMenuPreview {
 
 typedef ContextMenuIsAllowed = bool Function(Offset location);
 
+enum MenuForceBuilder { mobile, desktop }
+
 class ContextMenuWidget extends StatelessWidget {
   ContextMenuWidget({
     super.key,
@@ -60,6 +62,7 @@ class ContextMenuWidget extends StatelessWidget {
     required this.menuProvider,
     this.iconTheme,
     this.contextMenuIsAllowed = _defaultContextMenuIsAllowed,
+    this.forceBuilder,
     MobileMenuWidgetBuilder? mobileMenuWidgetBuilder,
     DesktopMenuWidgetBuilder? desktopMenuWidgetBuilder,
   })  : assert(previewBuilder == null || deferredPreviewBuilder == null,
@@ -80,6 +83,7 @@ class ContextMenuWidget extends StatelessWidget {
   final Widget child;
   final MobileMenuWidgetBuilder mobileMenuWidgetBuilder;
   final DesktopMenuWidgetBuilder desktopMenuWidgetBuilder;
+  final MenuForceBuilder? forceBuilder;
 
   /// Base icon theme for menu icons. The size will be overridden depending
   /// on platform.
@@ -92,7 +96,9 @@ class ContextMenuWidget extends StatelessWidget {
       listenable: kind,
       child: child,
       builder: (context, child) {
-        if (kind.value == PointerDeviceKind.touch) {
+        if ((kind.value == PointerDeviceKind.touch ||
+                forceBuilder == MenuForceBuilder.mobile) &&
+            forceBuilder != MenuForceBuilder.desktop) {
           return MobileContextMenuWidget(
             hitTestBehavior: hitTestBehavior,
             menuProvider: menuProvider,
